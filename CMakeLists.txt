@@ -1,0 +1,62 @@
+# Set VCPKG_ROOT to your vcpkg installation directory or add the following to your cmake call:
+# -DCMAKE_TOOLCHAIN=<path_to_vcpkg>/scripts/buildsystems/vcpkg.cmake
+
+cmake_minimum_required(VERSION 3.16)
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
+if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+  set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")  
+endif()
+if(DEFINED ENV{VCPKG_DEFAULT_TRIPLET} AND NOT DEFINED VCPKG_TARGET_TRIPLET)
+  set(VCPKG_TARGET_TRIPLET "$ENV{VCPKG_DEFAULT_TRIPLET}" CACHE STRING "")
+endif()
+
+project(cpp-modern LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+########################################################################
+# Catch2
+find_package(Catch2 3)
+
+if (NOT Catch2_FOUND)
+  Include(FetchContent)
+
+  FetchContent_Declare(
+    Catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG        v3.8.0 # or a later release
+  )
+
+  FetchContent_MakeAvailable(Catch2)
+
+  list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
+endif()
+
+enable_testing()
+
+include(CTest)
+include(Catch)
+
+add_subdirectory(move-semantics)
+add_subdirectory(smart-pointers)
+add_subdirectory(lambdas)
+add_subdirectory(constexpr)
+add_subdirectory(tuples-structured-bindings)
+add_subdirectory(core-features)
+add_subdirectory(small-features)
+add_subdirectory(string-view)
+add_subdirectory(optional)
+add_subdirectory(any)
+add_subdirectory(variant)
+
+add_subdirectory(_exercises/ex-move-semantics)
+add_subdirectory(_exercises/ex-algorithms-with-lambdas)
+add_subdirectory(_exercises/ex-shared-ptr)
+add_subdirectory(_exercises/ex-unique-ptr)
+add_subdirectory(_exercises/ex-constexpr)
+add_subdirectory(_exercises/ex-constexpr-if)
+add_subdirectory(_exercises/ex-optional)
+add_subdirectory(_exercises/ex-variant)
+add_subdirectory(_exercises/ex-string-view)
