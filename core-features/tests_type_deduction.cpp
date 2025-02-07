@@ -259,9 +259,11 @@ TEST_CASE("std::declval")
     decltype(std::declval<NoDefaultConstructor>().foo()) var1; // int
 }
 
+template <typename T = double>
 struct Values
 {
     int x;
+    T y;
     std::string text;
     std::vector<int> data;
 
@@ -272,17 +274,18 @@ struct Values
 
 TEST_CASE("decltype & struct members")
 {
-    using TMemberX = decltype(Values::x);
+    using TMemberX = decltype(Values<double>::x);
+    using TMemberY = decltype(Values<float>::y);
 
     Values values{42, "text"};
     using TMemberText = decltype(values.text);
 
-    using TMemberData = decltype(std::declval<Values>().data);
+    using TMemberData = decltype(std::declval<Values<>>().data);
 
-    const Values* ptr_obj = &values;
+    const Values<float>* ptr_obj = nullptr;
 
-    using Type = decltype(ptr_obj->data);
-    static_assert(std::is_same_v<Type, std::vector<int>>);
+    using Type = decltype(ptr_obj->y);
+    static_assert(std::is_same_v<Type, float>);
 }
 
 //////////////////////////////////////
