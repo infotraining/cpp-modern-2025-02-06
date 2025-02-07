@@ -21,13 +21,13 @@ namespace Explain
     }
 
     template <typename T, size_t N>
-    auto begin(T(&tab)[N])
+    auto begin(T (&tab)[N])
     {
         return tab;
     }
 
     template <typename T, size_t N>
-    auto end(T(&tab)[N])
+    auto end(T (&tab)[N])
     {
         return tab + N;
     }
@@ -37,7 +37,7 @@ TEST_CASE("looping with auto iterator")
 {
     SECTION("containers")
     {
-        //std::vector<int> vec = {1, 2, 3, 4, 5, 6, 42, 999};
+        // std::vector<int> vec = {1, 2, 3, 4, 5, 6, 42, 999};
         int vec[10] = {1, 2, 3, 4, 5, 6, 42, 999};
 
         for (auto it = std::begin(vec); it != std::end(vec); ++it)
@@ -62,25 +62,28 @@ TEST_CASE("range based for")
         i *= 2;
     }
 
-    for (const auto& i : vec)
+    SECTION("how it works")
     {
-        std::cout << i << " ";
-    }
-    std::cout << "\n";
-
-    SECTION("is interpreted as")
-    {
-        auto&& container = vec;
-        auto __begin = vec.begin(); // begin(vec)
-        auto __end = vec.end();     // end(vec)
-        for (auto it = __begin; it != __end; ++it)
+        for (const auto& i : vec)
         {
-            const auto& i = *it;
             std::cout << i << " ";
+        }
+        std::cout << "\n";
+
+        SECTION("is interpreted as")
+        {
+            auto&& container = vec;
+            auto __begin = vec.begin(); // begin(vec) is also tried
+            auto __end = vec.end();     // end(vec) is also tried
+            for (auto it = __begin; it != __end; ++it)
+            {
+                const auto& i = *it;
+                std::cout << i << " ";
+            }
         }
     }
 
-    SECTION("container of pointers")
+    SECTION("for container of pointers")
     {
         std::vector<std::string> words = {"one", "forty-two"};
         std::vector<std::string*> word_ptrs = {&words[0], &words[1]};
@@ -121,15 +124,15 @@ TEST_CASE("range-based for works with")
 
     SECTION("initializer lists")
     {
-        auto lst = {1, 2, 3, 4, 5}; 
-        
-        for(const auto& item : lst)
+        auto lst = {1, 2, 3, 4, 5};
+
+        for (const auto& item : lst)
         {
             std::cout << item << " ";
         }
         std::cout << "\n";
 
-        for(const auto& item : {1, 2, 3})
+        for (const auto& item : {1, 2, 3})
             std::cout << item << " ";
         std::cout << "\n";
     }
@@ -146,10 +149,10 @@ struct Triangle
     using const_iterator = const Point*;
 
     Point vertices[3];
-    
+
     iterator begin() { return vertices; }
     iterator end() { return vertices + 3; }
-    
+
     const_iterator begin() const { return vertices; }
     const_iterator end() const { return vertices + 3; }
 };
@@ -184,9 +187,9 @@ namespace AlternativeTake
 
 TEST_CASE("custom types & range-based for")
 {
-    const Triangle t{ Point{1, 0}, Point{3, 3}, Point{9, 5} };
+    const Triangle t{Point{1, 0}, Point{3, 3}, Point{9, 5}};
 
-    for(const auto& vertex : t)
+    for (const auto& vertex : t)
     {
         std::cout << "Point(x: " << vertex.x << ", y: " << vertex.y << ") ";
     }

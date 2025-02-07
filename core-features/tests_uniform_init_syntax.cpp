@@ -20,7 +20,8 @@ public:
     std::string c;
 
     Class()
-    {}
+    {
+    }
 
     Class(int a, double b, std::string c)
         : a{a}
@@ -72,7 +73,7 @@ TEST_CASE("uniform init syntax")
         int a2{42};
         int* ptr1{&a1};
         int a3 = int{42};
-        int a4{}; // int a3 = 0;
+        int a4{};    // int a3 = 0;
         int* ptr2{}; // int* ptr2 = nullptr;
 
         REQUIRE(a1 == 42);
@@ -106,7 +107,7 @@ uint64_t get_value()
 }
 
 TEST_CASE("uniform init - implicit narrowing conversion is an error")
-{   
+{
     uint64_t value{get_value()};
 }
 
@@ -118,7 +119,7 @@ void print_items(std::initializer_list<T> lst)
 {
     std::cout << "List of " << lst.size() << " items: ";
 
-    for(const auto& item : lst)
+    for (const auto& item : lst)
         std::cout << item << " ";
     std::cout << "\n";
 }
@@ -177,8 +178,6 @@ private:
     int* items_;
 };
 
-
-
 TEST_CASE("custom container")
 {
     ContainerInt container = {1, 2, 3, 4, 5, 6, 7};
@@ -198,4 +197,35 @@ TEST_CASE("custom container")
         std::vector<int> vec2{5, 1};
         REQUIRE(vec2 == std::vector{5, 1});
     }
+}
+
+class XAggregate
+{
+public:
+    int a, b, c;
+};
+
+struct XClassWithCtor
+{
+    int a, b, c;
+
+    XClassWithCtor(int a = 0, int b = 0, int c = 0)
+        : a{a}
+        , b{b}
+        , c{c}
+    {
+    }
+};
+
+TEST_CASE("question")
+{
+    XAggregate x1{1, 2, 3};
+    XAggregate x2{};
+    XAggregate x3{1, 2};
+
+    XClassWithCtor x4{1, 2, 3};
+    XClassWithCtor x5(1, 2, 3);
+    XClassWithCtor x6{};
+    XClassWithCtor x7{1, 2};
+    XClassWithCtor x8(1, 2);
 }

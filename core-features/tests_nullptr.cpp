@@ -41,7 +41,7 @@ TEST_CASE("long long is a new type")
 TEST_CASE("nullptr")
 {
     Nullptr::foo(nullptr);
-    Nullptr::foo(NULL); // should be replaced by nullptr
+    // Nullptr::foo(NULL); // should be replaced by nullptr
 
     int* ptr1 = nullptr;
     int* ptr2{};
