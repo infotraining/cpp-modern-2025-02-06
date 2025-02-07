@@ -22,7 +22,27 @@ public:
     {
     }
 
-    // TODO: implement move semantics
+    UniquePtr(const UniquePtr&) = delete;
+    UniquePtr& operator=(const UniquePtr&) = delete;
+
+    // move constructor
+    UniquePtr(UniquePtr&& source) : ptr_{source.ptr_}
+    {
+        source.ptr_ = nullptr;
+    }
+
+    // move assignment operator
+    UniquePtr& operator=(UniquePtr&& source)
+    {
+        if (this != &source)
+        {
+            delete ptr_;
+            ptr_ = source.ptr_;
+            source.ptr_ = nullptr;
+        }
+
+        return *this;
+    }
 
     ~UniquePtr()
     {
@@ -55,9 +75,18 @@ public:
 //     std::cout << "\n--------------------------\n\n";
 // }
 
-// TEST_CASE("move semantics - UniquePtr")
-// {
-//     // TODO
-//     UniquePtr<Gadget> pg1{new Gadget{1, "ipad"}};
-//     pg1->use();
-// }
+TEST_CASE("move semantics - UniquePtr")
+{
+    UniquePtr<Gadget> pg1{new Gadget{1, "ipad"}};
+    
+    if (pg1)
+        pg1->use();
+
+    UniquePtr<Gadget> pg2 = std::move(pg1); // move constructor called from UniquePtr
+    pg2->use();
+
+    pg2 = UniquePtr<Gadget>{new Gadget{2, "smartwatch"}}; 
+    pg2 = std::move(pg2); // self assignment
+
+    pg2->use();
+}
