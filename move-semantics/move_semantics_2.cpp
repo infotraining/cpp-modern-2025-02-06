@@ -157,7 +157,7 @@ struct Matrix
 
 Matrix create_matrix()
 {
-    Matrix m(1'000'000);
+    Matrix m(1'000);
 
     //..
 

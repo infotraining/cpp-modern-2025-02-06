@@ -1,5 +1,4 @@
-#define CATCH_CONFIG_MAIN
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <cassert>
 #include <iostream>
@@ -15,9 +14,9 @@ TEST_CASE("find_null description")
 {
     SECTION("finds first null pointer in a std container of raw pointers")
     {
-        vector<int*> ptrs = {new int{9}, new int{10}, NULL, new int{20}, nullptr, new int{23}};
+        vector<int*> ptrs = {new int{9}, new int{10}, nullptr, new int{20}, nullptr, new int{23}};
 
-        auto first_null_appearence = find_null(ptrs);
+        vector<int*>::iterator first_null_appearence = find_null(ptrs);
 
         REQUIRE(distance(ptrs.begin(), first_null_appearence) == 2);
 
