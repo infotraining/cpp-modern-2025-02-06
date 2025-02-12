@@ -1,11 +1,13 @@
-#include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_section_info.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <iostream>
 
 class ContainerInt
 {
 public:
-    ContainerInt(size_t size, int value) : size_{size}, items_{new int[size_]}
+    ContainerInt(size_t size, int value)
+        : size_{size}
+        , items_{new int[size_]}
     {
         std::fill_n(items_, size_, value);
     }
@@ -42,9 +44,31 @@ public:
         return *this;
     }
 
-    // TODO: move constructor 
+    // TODO: move constr
+    ContainerInt(ContainerInt&& source)
+        : size_{source.size_}
+        , items_{source.items_}
+    {
+        source.size_ = 0;
+        source.items_ = nullptr;
+    }
 
     // TODO: move assignment
+    ContainerInt& operator=(ContainerInt&& source)
+    {
+        if (this != &source)
+        {
+            delete[] items_;
+
+            size_ = source.size_;
+            items_ = source.items_;
+
+            source.size_ = 0;
+            source.items_ = nullptr;
+        }
+
+        return *this;
+    }
 
     ~ContainerInt()
     {
@@ -98,6 +122,7 @@ public:
     {
         return items_ + size_;
     }
+
 private:
     size_t size_;
     int* items_;
@@ -116,6 +141,7 @@ void print_all(const T& container, std::string_view prefix)
 
 TEST_CASE("implement move semantics")
 {
+
     SECTION("move constructor")
     {
         std::cout << "-------------------------\n";
@@ -141,7 +167,7 @@ TEST_CASE("implement move semantics")
 
         ContainerInt c1 = {10, 42};
         print_all(c1, "c1");
-        
+
         ContainerInt c2{5, 1, 3};
         print_all(c2, "c2");
 
@@ -150,7 +176,6 @@ TEST_CASE("implement move semantics")
         std::cout << "After move assignment" << std::endl;
         print_all(c1, "c1");
         print_all(c2, "c2");
-
 
         REQUIRE(c1.size() == 0);
         REQUIRE(c2.size() == 2);
