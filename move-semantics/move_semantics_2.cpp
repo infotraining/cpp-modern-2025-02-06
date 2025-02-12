@@ -149,8 +149,10 @@ struct Matrix
 {
     std::vector<std::vector<double>> matrix;
 
-    explicit Matrix(size_t size) : matrix(size, std::vector<double>(size))
-    {}
+    explicit Matrix(size_t size)
+        : matrix(size, std::vector<double>(size))
+    {
+    }
 };
 
 Matrix create_matrix()
@@ -164,5 +166,5 @@ Matrix create_matrix()
 
 TEST_CASE("C++11 Efficiency")
 {
-    Matrix m = create_matrix();
+    Matrix m = create_matrix(); // move semantics in the worst case
 }
