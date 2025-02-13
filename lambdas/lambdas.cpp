@@ -4,6 +4,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <functional>
+#include <queue>
 
 using namespace std;
 
@@ -215,10 +217,21 @@ struct Gadget
     int id{42};
     std::string name{"Gadget"};
 
-    void use()
+    void use() const
     {
         auto printer = [this]
         { std::cout << "Gadget: " << id << ", " << name << "\n"; };
+        printer();
+    }
+
+    void safe_use()
+    {
+
+        auto printer = [&self = std::as_const(*this)]
+        { 
+            std::cout << "const Gadget: " << self.id << ", " << self.name << "\n"; 
+            self.use();
+        };
         printer();
     }
 };
@@ -317,4 +330,109 @@ TEST_CASE("passing lambdas")
 
     auto pos_gt_10 = Explain::find_if(vec, [](int n) { return n > 10; });
     REQUIRE(*pos_gt_10 == 42);
+}
+
+struct Fan
+{
+    void on()
+    {
+        std::cout << "Fan::on()\n";
+    }
+
+    void off()
+    {
+        std::cout << "Fan::off()\n";
+    }
+};
+
+TEST_CASE("storing lambdas")
+{
+    SECTION("auto - prefered")
+    {
+        auto cmp_deref = [](int* a, int* b) { return *a < *b; };
+
+        int x = 10;
+        int y = 42;
+
+        REQUIRE(cmp_deref(&x, &y) == true);
+    }
+
+    SECTION("ptr to function - for non-capturing lambdas")
+    {
+        bool (*ptr_fun)(int*, int*) = nullptr;
+
+        ptr_fun = [](int* a, int* b) { return *a < *b; }; // OK because capture clause is empty
+        ptr_fun = [](int* a, int* b) { return *a > *b; };
+
+        int x = 10;
+        int y = 42;
+
+        REQUIRE(ptr_fun(&x, &y) == false);
+
+        using Callback_CStyle =  void(*)(double);
+        Callback_CStyle on_temperature_change;
+
+        on_temperature_change = [](double temp) { std::cout << "Current temp: " << temp << "\n"; };
+
+        on_temperature_change(21.2);
+        on_temperature_change(21.5);
+        on_temperature_change(21.3);
+    }
+
+    SECTION("std::function")
+    {
+        std::function<void(double)> on_temperature_change;
+
+        on_temperature_change = [](double temp) { std::cout << "Current temp: " << temp << "\n"; };
+        on_temperature_change(24.5);
+
+        Fan fan;
+
+        on_temperature_change = [&fan](double temp) { if (temp > 25.0) fan.on(); };
+        on_temperature_change(28.4);
+    }
+}
+
+struct TaskQueue
+{
+    using Task = std::function<void()>;
+
+    std::queue<Task> tasks_;
+
+    template<typename TTask>
+    void submit(TTask&& task)
+    {
+        tasks_.push(std::forward<TTask>(task));
+    }
+
+    void run()
+    {
+        while(!tasks_.empty())
+        {
+            Task task = tasks_.front();
+            task();
+            tasks_.pop();
+        }
+    }
+};
+
+void start()
+{
+    std::cout << "Start...\n";
+}
+
+TEST_CASE("TaskQueue")
+{
+    auto fan = std::make_shared<Fan>();
+
+    TaskQueue q;
+
+    q.submit(&start);
+
+    auto turn_on_fan = [fan]() { fan->on(); };
+    q.submit(turn_on_fan);
+    q.submit([fan]() { fan->off(); });
+    q.submit([]{ std::cout << "Stop...\n"; });
+
+    q.run();
 }
