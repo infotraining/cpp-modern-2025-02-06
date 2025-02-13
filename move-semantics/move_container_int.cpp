@@ -54,17 +54,17 @@ public:
     }
 
     // TODO: move constr
-    ContainerInt(ContainerInt&& source)
+    ContainerInt(ContainerInt&& source) noexcept
         : size_{std::exchange(source.size_, 0)}
         , items_{std::exchange(source.items_, nullptr)}
     {
-        std::cout << "Container(mv: ";
-        print_items();
-        std::cout << ");\n";
+        // std::cout << "Container(mv: ";
+        // print_items();
+        // std::cout << ");\n";
     }
 
     // TODO: move assignment
-    ContainerInt& operator=(ContainerInt&& source)
+    ContainerInt& operator=(ContainerInt&& source) noexcept
     {
         if (this != &source)
         {
@@ -73,15 +73,15 @@ public:
             size_ = std::exchange(source.size_, 0);
             items_ = std::exchange(source.items_, nullptr);
 
-            std::cout << "Container(ma: ";
-            print_items();
-            std::cout << ");\n";
+            // std::cout << "Container(ma: ";
+            // print_items();
+            // std::cout << ");\n";
         }
 
         return *this;
     }
 
-    ~ContainerInt()
+    ~ContainerInt() noexcept
     {
         delete[] items_;
     }
@@ -96,7 +96,7 @@ public:
         return items_[index];
     }
 
-    size_t size() const
+    size_t size() const noexcept
     {
         return size_;
     }
@@ -104,32 +104,32 @@ public:
     using iterarator = int*;
     using const_iterator = const int*;
 
-    iterarator begin()
+    iterarator begin() noexcept
     {
         return items_;
     }
 
-    iterarator end()
+    iterarator end() noexcept
     {
         return items_ + size_;
     }
 
-    const_iterator begin() const
+    const_iterator begin() const noexcept
     {
         return items_;
     }
 
-    const_iterator end() const
+    const_iterator end() const noexcept
     {
         return items_ + size_;
     }
 
-    const_iterator cbegin() const
+    const_iterator cbegin() const noexcept
     {
         return items_;
     }
 
-    const_iterator cend() const
+    const_iterator cend() const noexcept
     {
         return items_ + size_;
     }
@@ -335,4 +335,25 @@ TEST_CASE("MyData - default special ops")
     MyData md2 = md1; // cc
 
     MyData md3 = std::move(md1); // mv
+}
+
+TEST_CASE("vector & push_back")
+{
+    std::vector<ContainerInt> vec;
+    vec.push_back(ContainerInt{1});
+
+    for(int i = 2; i <= 16; ++i)
+    {
+        std::cout << "---------\n";
+        vec.push_back(ContainerInt{i});
+    }
+
+    std::cout << "---------\n";
+    vec.push_back(ContainerInt{17});
+
+    ContainerInt c = {1, 2, 3};
+
+    decltype(c.begin()) it;
+
+    constexpr bool is_size_noexcept = noexcept(c.size()); // noexcept operator
 }

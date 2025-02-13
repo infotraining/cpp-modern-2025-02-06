@@ -70,7 +70,7 @@ struct Gadget
         ++move_counter;
     }
 
-    Gadget& operator=(Gadget&& other) 
+    Gadget& operator=(Gadget&& other) noexcept
     {
         if (this != &other)
         {
