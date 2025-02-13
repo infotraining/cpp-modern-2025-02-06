@@ -176,7 +176,7 @@ void just_use_as_const(const std::vector<int>& vec)
 std::vector<std::vector<int>> global_vec{};
 
 template <typename T>
-void insert_into_global(T&& vec)
+void insert_into_global(T&& vec) // T&& - universal reference
 {
     global_vec.push_back(std::forward<T>(vec));
 }
@@ -192,4 +192,75 @@ TEST_CASE("passing objects")
     insert_into_global(std::vector{645, 765, 34, 66});
 
     void (*fptr)(int) noexcept = &never_throws;
+}
+
+struct ComplexData
+{
+    int id;
+    std::string name;
+    std::vector<int> data;
+
+    // ComplexData(int id_arg, const std::string& name_arg, const std::vector<int>& data_arg) : id(id_arg), name(name_arg), data(data_arg)
+    // {}
+
+    // optimal but cumbersome to implement
+    // template<typename TArg1, typename TArg2>
+    // ComplexData(int id_arg, TArg1&& name_arg, TArg2&& data_arg) : id(id_arg), name(std::forward<TArg1>(name_arg)), data(std::forward<TArg2>(data_arg))
+    // {}
+
+    ComplexData(int id_arg, std::string name_arg, std::vector<int> data_arg) : id{id_arg}, name{std::move(name_arg)}, data{std::move(data_arg)}
+    {}
+};
+
+TEST_CASE("move semantics & constructors")
+{
+    std::vector<int> vec = {1, 2, 3, 4};
+    std::string name = "data";
+    int id = 42;
+    
+    SECTION("l-value passed as args")
+    {
+        ComplexData c1{id, name, vec};
+    }
+
+    SECTION("r-value passed as args")
+    {
+        ComplexData c2{665, "other-data" /*prvalue*/, std::vector{1, 2, 3} /*prvalue*/};
+    }
+
+    SECTION("x-value passed as args")
+    {
+        ComplexData c3{id, std::move(name), std::move(vec)};
+    }
+}
+
+std::vector<int> load_from_file()
+{
+    std::vector<int> vec;
+    vec.reserve(1024);
+
+    vec.push_back(665);
+
+    return vec; // Named RVO - possible copy elision
+}
+
+ComplexData function_with_rvo() // copy elision must be done since C++17
+{
+    std::vector<int> vec = load_from_file(); // RVO - copy elision
+
+    return /*prvalue*/ ComplexData{888, "data-rvo", std::move(vec)}; 
+}
+
+ComplexData function_with_named_rvo()  // NRVO copy elision might be done
+{
+    ComplexData cd = function_with_rvo(); // copy elision
+
+    //...
+
+    return cd; // lvalue
+}
+
+TEST_CASE("rvo - return value optimization")
+{
+    ComplexData cd = function_with_rvo(); // since C++17 - no copy ctor & no move ctor - copy elison
 }
