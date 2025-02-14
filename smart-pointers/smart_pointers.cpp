@@ -8,6 +8,7 @@
 #include <numeric>
 #include <string>
 #include <vector>
+#include <thread>
 
 // https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#S-resource
 
@@ -156,3 +157,48 @@ TEST_CASE("Safer code with smart pointers")
         }
     }
 }
+
+TEST_CASE("shared_ptrs & threads")
+{
+    using namespace std::literals;
+
+    using Dictionary = std::map<int, std::string>;
+
+    std::thread thd_1;
+    std::thread thd_2;
+
+    {
+        auto dictionary = std::make_shared<Dictionary>();
+
+        dictionary->emplace(1, "one");
+        dictionary->emplace(2, "two");
+
+        thd_1 = std::thread([dictionary]() { 
+            std::cout << "Thread#1 started..." << std::endl;
+            std::this_thread::sleep_for(1s);
+
+            dictionary->emplace(3, "three"); // RC
+
+            auto pos = dictionary->find(1);
+            if (pos != dictionary->end())
+            {
+                std::cout << "item: " << pos->second << "\n";
+            }
+        });
+
+        thd_2 = std::thread([dictionary]() { 
+            std::cout << "Thread#2 started..." << std::endl;
+            std::this_thread::sleep_for(2s);
+
+            auto pos = dictionary->find(2);
+            if (pos != dictionary->end())
+            {
+                std::cout << "item: " << pos->second << "\n";
+            }
+        });
+    }
+
+    thd_1.join();
+    thd_2.join();
+}
+
