@@ -1,5 +1,9 @@
 # Modern C++ - Szkolenie
 
+## Slajdy + Materiały
+
+* https://cpp-modern.infotraining.pl/
+
 ## Ankieta
 
 * https://forms.gle/k2RwrH55B5DtSokx7
