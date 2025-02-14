@@ -1,5 +1,9 @@
 # Modern C++ - Szkolenie
 
+## Ankieta
+
+* https://forms.gle/k2RwrH55B5DtSokx7
+
 ## Konfiguracja środowiska
 
 Proszę wybrać jedną z poniższych opcji:

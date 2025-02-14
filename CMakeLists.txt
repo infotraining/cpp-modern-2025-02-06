@@ -51,6 +51,7 @@ add_subdirectory(string-view)
 add_subdirectory(optional)
 add_subdirectory(any)
 add_subdirectory(variant)
+add_subdirectory(templates)
 
 add_subdirectory(_exercises/ex-move-semantics)
 add_subdirectory(_exercises/ex-algorithms-with-lambdas)

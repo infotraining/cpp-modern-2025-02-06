@@ -155,11 +155,13 @@ void foobar(int x, const std::string& s)
     std::cout << "foobar(" << x << ", " << s << ")\n";
 }
 
-template<typename F, typename TArg1, typename TArg2>
-decltype(auto) call_wrapper(F f, TArg1&& arg1, TArg2&& arg2)
+template<typename F, typename... TArgs>
+decltype(auto) call_wrapper(F f, TArgs&&... args)
 {
-    std::cout << "Log: " << " calling f!!!\n";
-    return f(std::forward<TArg1>(arg1), std::forward<TArg2>(arg2));
+    std::cout << "Log: " << " calling f(";
+    (..., (std::cout << args << ";")) << ")\n";
+
+    return f(std::forward<TArgs>(args)...);
 }
 
 TEST_CASE("call_wrapper")

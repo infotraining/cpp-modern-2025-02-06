@@ -5,6 +5,6 @@
 
 using namespace std;
 
-TEST_CASE("class template argument deduction")
-{
-}
+// TEST_CASE("class template argument deduction")
+// {
+// }
