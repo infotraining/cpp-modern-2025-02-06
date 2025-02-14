@@ -150,5 +150,7 @@ TEST_CASE("Forward List")
 
         for (int i = 0; i < 1'000'000; ++i)
             fwd_lst.push_front(i);
+
+        REQUIRE(fwd_lst.size() == 1'000'000);
     }
 }
