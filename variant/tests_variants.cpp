@@ -13,8 +13,13 @@ class Rectangle
 {
     int width;
     int height;
+
 public:
-    Rectangle(int width, int height) : width(width), height(height) {}
+    Rectangle(int width = 0, int height = 0)
+        : width(width)
+        , height(height)
+    {
+    }
 
     void draw() const
     {
@@ -30,8 +35,12 @@ public:
 class Circle
 {
     int radius;
+
 public:
-    Circle(int radius) : radius(radius) {}
+    Circle(int radius = 0)
+        : radius(radius)
+    {
+    }
 
     void draw() const
     {
@@ -47,8 +56,12 @@ public:
 class Square
 {
     Rectangle rectangle;
+
 public:
-    Square(int size) : rectangle(size, size) {}
+    Square(int size = 0)
+        : rectangle(size, size)
+    {
+    }
 
     void draw() const
     {
@@ -61,6 +74,68 @@ public:
     }
 };
 
+struct DrawVisitor
+{
+    // void operator()(const Rectangle& r) const
+    // {
+    //     r.draw();
+    // }
+
+    // void operator()(const Circle& c) const
+    // {
+    //     c.draw();
+    // }
+
+    // void operator()(const Square& s) const
+    // {
+    //     s.draw();
+    // }
+
+    template <typename T>
+    void operator()(const T& shape) const
+    {
+        shape.draw();
+    }
+};
+
 TEST_CASE("variant")
 {
+    std::variant<Rectangle, Circle, Square> shape;
+    REQUIRE(std::holds_alternative<Rectangle>(shape));
+
+    shape = Circle{10};
+    shape = Square{20};
+
+    Square& ref_square = std::get<Square>(shape);
+    ref_square.draw();
+
+    REQUIRE(shape.index() == 2);
+
+    SECTION("visiting variants")
+    {
+        using Shape = std::variant<Rectangle, Circle, Square>;
+        std::vector<Shape> shapes = {Rectangle{10, 20}, Circle{5}, Square{15}};
+
+        SECTION("visitor as struct")
+        {
+            DrawVisitor draw_visitor;
+
+            for (const auto& shape : shapes)
+                std::visit(draw_visitor, shape);
+        }
+
+        SECTION("visitor as lambda")
+        {
+            for (const auto& shape : shapes)
+            {
+                std::visit([](const auto& s) { s.draw(); }, shape);
+            }
+
+            double area{};
+            for (const auto& shape : shapes)
+            {
+                area += std::visit([](const auto& s) { return s.area(); }, shape);
+            }
+        }
+    }
 }
