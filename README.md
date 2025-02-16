@@ -3,6 +3,7 @@
 ## Slajdy + Materiały
 
 * https://cpp-modern.infotraining.pl/
+* https://infotraining.bitbucket.io/cpp-modern/slides/
 
 ## Ankieta
 
